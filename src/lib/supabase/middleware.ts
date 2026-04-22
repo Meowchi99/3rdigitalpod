@@ -12,15 +12,15 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
-        setAll(list: any) {
-          list.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({ request });
-         list.forEach(({ name, value }: any) => ...
-            supabaseResponse.cookies.set(name, value, options)
-          );
-        },
-      },
-    }
+       setAll(list: any) {
+            list.forEach(({ name, value }: any) => request.cookies.set(name, value))
+            supabaseResponse = NextResponse.next({
+              request,
+            })
+            list.forEach(({ name, value, options }: any) =>
+              supabaseResponse.cookies.set(name, value, options)
+            )
+          },
   );
 
   const {

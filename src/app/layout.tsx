@@ -3,6 +3,10 @@ import './globals.css';
 import TopNav from '@/components/nav/TopNav';
 import { getCurrentProfile } from '@/lib/auth';
 
+// ⚠️ ป้องกัน layout caching — layout ต้อง re-render ทุกครั้งตาม auth cookies
+// มิเช่นนั้น TopNav จะแสดง state เก่า (ไม่ล็อกอิน) หลังล็อกอินสำเร็จ
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: '3R Digital POD — AI Toolkit for Print on Demand',
   description:

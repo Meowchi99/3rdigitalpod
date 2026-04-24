@@ -18,13 +18,26 @@ export interface Profile {
 
 export interface OwnerProfile {
   id: 1;
-  display_name: string;
-  role_title: string;
+  owner_name: string;
+  profile_image_url: string | null;
   intro: string | null;
   story: string | null;
-  avatar_url: string | null;
-  banner_url: string | null;
-  social_links: Record<string, string>;
+  story_image_url: string | null;
+  total_revenue: number | null;
+  monthly_revenue: number | null;
+  revenue_note: string | null;
+  updated_at: string;
+}
+
+export interface SoldDesign {
+  id: string;
+  title: string;
+  image_url: string | null;
+  niche: string | null;
+  badge_text: string | null;
+  sort_order: number;
+  is_visible: boolean;
+  created_at: string;
   updated_at: string;
 }
 

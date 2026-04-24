@@ -4,8 +4,9 @@ import { requireRole } from '@/lib/auth';
 const ADMIN_LINKS = [
   { href: '/admin', icon: '📊', label: 'Overview' },
   { href: '/admin/winning-designs', icon: '🏆', label: 'Winning Designs' },
+  { href: '/admin/sold-designs', icon: '💎', label: 'Sold Designs', ownerOnly: true },
   { href: '/admin/trends', icon: '📡', label: 'Trends' },
-  { href: '/admin/owner-profile', icon: '👤', label: 'Owner Profile' },
+  { href: '/admin/owner-profile', icon: '👤', label: 'Owner Profile', ownerOnly: true },
   { href: '/admin/api-settings', icon: '🔑', label: 'API Settings' },
   { href: '/admin/users', icon: '👥', label: 'Users & Roles' },
   { href: '/admin/usage', icon: '📊', label: 'Usage Dashboard' },
@@ -32,7 +33,7 @@ export default async function AdminLayout({
           </span>
         </div>
         <nav className="mt-3 flex flex-col gap-0.5">
-          {ADMIN_LINKS.map((l) => (
+          {ADMIN_LINKS.filter((l) => !l.ownerOnly || profile.role === 'owner').map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -40,6 +41,11 @@ export default async function AdminLayout({
             >
               <span className="w-5 text-center">{l.icon}</span>
               <span>{l.label}</span>
+              {l.ownerOnly && (
+                <span className="ml-auto rounded bg-brand-yellow/15 px-1.5 py-0.5 text-[9px] font-bold text-brand-yellow">
+                  OWNER
+                </span>
+              )}
             </Link>
           ))}
         </nav>

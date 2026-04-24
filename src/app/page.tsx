@@ -3,7 +3,13 @@ import { createClient } from '@/lib/supabase/server';
 import { Section } from '@/components/ui';
 import HomeQuickPrompt from '@/components/tools/HomeQuickPrompt';
 import MakeMeMoney from '@/components/tools/MakeMeMoney';
-import type { WinningDesign, Trend, ExternalLink as ExtLink } from '@/types';
+import SoldDesignsSection from '@/components/tools/SoldDesignsSection';
+import type {
+  WinningDesign,
+  Trend,
+  ExternalLink as ExtLink,
+  SoldDesign,
+} from '@/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +18,7 @@ export default async function HomePage() {
 
   const [
     { data: designs },
+    { data: soldDesigns },
     { data: dailyTrends },
     { data: monthlyTrends },
     { data: links },
@@ -22,6 +29,13 @@ export default async function HomePage() {
       .eq('is_published', true)
       .order('sort_order')
       .limit(6),
+    supabase
+      .from('sold_designs')
+      .select('*')
+      .eq('is_visible', true)
+      .order('sort_order', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(5),
     supabase
       .from('trends')
       .select('*')
@@ -119,6 +133,11 @@ export default async function HomePage() {
           ))}
         </div>
       </div>
+
+      <hr className="mx-6 border-white/[0.07]" />
+
+      {/* ⭐ SOLD DESIGNS — social proof (owner-managed) */}
+      <SoldDesignsSection designs={(soldDesigns as SoldDesign[] | null) ?? []} />
 
       <hr className="mx-6 border-white/[0.07]" />
 

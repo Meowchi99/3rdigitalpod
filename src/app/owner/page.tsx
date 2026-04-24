@@ -14,82 +14,158 @@ export default async function OwnerPage() {
     .eq('id', 1)
     .single();
   const owner = data as OwnerProfile | null;
+
   const profile = await getCurrentProfile();
-  const canEdit = profile?.role === 'owner' || profile?.role === 'admin';
+  const canEdit = profile?.role === 'owner';
 
   return (
     <Section title="👤 OWNER" subtitle="เจ้าของและผู้พัฒนา 3R Digital POD">
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-4xl space-y-8">
+        {/* ─── Hero: avatar + name + intro ─── */}
         <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-ink-900">
-          {/* Banner */}
-          <div
-            className="relative flex h-40 items-end bg-gradient-to-br from-[#0d0010] via-ink-800 to-[#00081a] px-6 pb-4"
-            style={
-              owner?.banner_url
-                ? { backgroundImage: `url(${owner.banner_url})`, backgroundSize: 'cover', backgroundPosition: 'center' }
-                : undefined
-            }
-          >
-            <div className="absolute bottom-4 right-6 font-display text-5xl tracking-widest opacity-10">3RPOD</div>
-          </div>
-
-          <div className="px-6 pb-8 pt-4">
-            <div className="mb-4 flex items-start gap-4">
-              <div className="-mt-10 flex h-20 w-20 shrink-0 items-center justify-center rounded-full border-4 border-ink-900 bg-gradient-to-br from-brand-red to-brand-pink text-3xl">
-                {owner?.avatar_url ? (
-                  <img src={owner.avatar_url} alt="" className="h-full w-full rounded-full object-cover" />
-                ) : (
-                  '👨‍💻'
-                )}
-              </div>
-              <div className="pt-2">
-                <div className="text-xl font-bold">{owner?.display_name || '3R Digital Lab'}</div>
-                <div className="font-mono text-xs text-brand-pink">// {owner?.role_title || 'POD Creator'}</div>
-              </div>
+          <div className="flex flex-col items-center gap-6 p-8 sm:flex-row sm:items-start">
+            <div className="relative h-36 w-36 shrink-0 overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-brand-red/20 via-ink-800 to-brand-blue/20">
+              {owner?.profile_image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={owner.profile_image_url}
+                  alt={owner.owner_name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-5xl">
+                  👤
+                </div>
+              )}
             </div>
 
-            <p className="mb-4 text-sm leading-relaxed text-muted">
-              {owner?.intro || 'สร้าง 3R Digital POD เพื่อรวมทุก workflow ของ Print on Demand ไว้ในที่เดียว'}
-            </p>
-
-            {owner?.story && (
-              <div className="mb-4 rounded-lg bg-ink-800 p-4 text-xs leading-relaxed text-muted">
-                <div className="mb-1 font-bold text-white">📖 Story</div>
-                {owner.story}
+            <div className="flex-1 text-center sm:text-left">
+              <h1 className="font-display text-4xl tracking-widest">
+                {owner?.owner_name || 'Owner'}
+              </h1>
+              <div className="mt-1 font-mono text-xs text-brand-pink">
+                // 3R Digital POD · Owner
               </div>
-            )}
-
-            {/* Socials */}
-            <div className="flex flex-wrap gap-2">
-              {Object.entries(owner?.social_links || {}).map(
-                ([k, v]) =>
-                  v && (
-                    <a
-                      key={k}
-                      href={v as string}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 rounded-md border border-white/[0.07] bg-ink-800 px-3.5 py-1.5 text-xs text-muted hover:text-white"
-                    >
-                      <span className="capitalize">{k}</span>
-                    </a>
-                  )
+              {owner?.intro && (
+                <p className="mt-4 text-sm leading-relaxed text-muted">
+                  {owner.intro}
+                </p>
               )}
             </div>
           </div>
         </div>
 
+        {/* ─── Revenue Section ─── */}
+        {(owner?.total_revenue !== null ||
+          owner?.monthly_revenue !== null ||
+          owner?.revenue_note) && (
+          <div className="overflow-hidden rounded-2xl border border-brand-yellow/20 bg-gradient-to-br from-ink-900 via-ink-900 to-[#1a1200] p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold uppercase tracking-wider text-brand-yellow">
+                  💰 Revenue
+                </div>
+                <div className="mt-0.5 text-[11px] text-muted">
+                  ผลจากการทำ Print on Demand
+                </div>
+              </div>
+              {owner?.revenue_note && (
+                <span className="rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1 text-[10px] font-mono text-brand-yellow">
+                  {owner.revenue_note}
+                </span>
+              )}
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <RevenueCard
+                label="Total Revenue"
+                value={owner?.total_revenue}
+                color="text-brand-yellow"
+                icon="💎"
+              />
+              <RevenueCard
+                label="Monthly Revenue"
+                value={owner?.monthly_revenue}
+                color="text-brand-pink"
+                icon="📈"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ─── Story Section ─── */}
+        {(owner?.story || owner?.story_image_url) && (
+          <div className="overflow-hidden rounded-2xl border border-white/[0.07] bg-ink-900">
+            <div className="border-b border-white/[0.07] px-6 py-4">
+              <div className="text-xs font-bold uppercase tracking-wider text-brand-blue-3">
+                📖 Story / Background
+              </div>
+            </div>
+
+            {owner?.story_image_url && (
+              <div className="aspect-[16/9] w-full overflow-hidden bg-ink-800">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={owner.story_image_url}
+                  alt="Owner story"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            )}
+
+            {owner?.story && (
+              <div className="whitespace-pre-wrap px-6 py-6 text-sm leading-relaxed text-muted">
+                {owner.story}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ─── Edit CTA (owner only) ─── */}
         {canEdit && (
-          <div className="mt-5 text-center">
+          <div className="text-center">
             <Link
               href="/admin/owner-profile"
-              className="inline-flex items-center gap-2 rounded-lg border border-brand-yellow/30 bg-brand-yellow/10 px-5 py-2 text-sm font-bold text-brand-yellow hover:bg-brand-yellow/20"
+              className="inline-flex items-center gap-2 rounded-lg border border-brand-yellow/30 bg-brand-yellow/10 px-5 py-2.5 text-sm font-bold text-brand-yellow hover:bg-brand-yellow/20"
             >
-              ✏️ Edit Owner Profile (Admin)
+              ✏️ Edit Owner Profile
             </Link>
           </div>
         )}
       </div>
     </Section>
+  );
+}
+
+function RevenueCard({
+  label,
+  value,
+  color,
+  icon,
+}: {
+  label: string;
+  value: number | null | undefined;
+  color: string;
+  icon: string;
+}) {
+  const display =
+    value !== null && value !== undefined
+      ? new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          maximumFractionDigits: 0,
+        }).format(Number(value))
+      : '—';
+
+  return (
+    <div className="rounded-xl border border-white/[0.07] bg-ink-800 p-4">
+      <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider text-muted">
+        <span>{icon}</span>
+        <span>{label}</span>
+      </div>
+      <div className={`mt-2 font-display text-3xl tracking-widest ${color}`}>
+        {display}
+      </div>
+    </div>
   );
 }

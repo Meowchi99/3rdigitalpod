@@ -1,48 +1,27 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useFormState, useFormStatus } from 'react-dom';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
+import { signUpAction, type SignupState } from './actions';
 import { ActionButton, Field } from '@/components/ui';
 
 export default function SignupPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [pending, startTransition] = useTransition();
+  const [state, formAction] = useFormState<SignupState, FormData>(
+    signUpAction,
+    null
+  );
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    startTransition(async () => {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-          data: { display_name: displayName },
-        },
-      });
-      if (error) {
-        setError(error.message);
-        return;
-      }
-      setSuccess(true);
-    });
-  }
-
-  if (success) {
+  if (state?.success && state.needsConfirm) {
     return (
       <div className="mx-auto max-w-md px-6 py-20 text-center">
         <div className="mb-4 text-5xl">📧</div>
-        <h1 className="mb-3 font-display text-3xl tracking-widest">ตรวจสอบอีเมลของคุณ</h1>
+        <h1 className="mb-3 font-display text-3xl tracking-widest">
+          ตรวจสอบอีเมลของคุณ
+        </h1>
         <p className="text-sm text-muted">
-          เราส่งลิงก์ยืนยันไปที่ <span className="text-white">{email}</span> กรุณาคลิกลิงก์เพื่อเริ่มใช้งาน
+          เราส่งลิงก์ยืนยันไปที่{' '}
+          <span className="text-white">{state.email}</span>{' '}
+          กรุณาคลิกลิงก์เพื่อเริ่มใช้งาน
         </p>
       </div>
     );
@@ -55,36 +34,22 @@ export default function SignupPage() {
         สมัครเพื่อเซฟผลงาน, ติดตามประวัติ, และใช้ฟีเจอร์ทั้งหมดฟรี
       </p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <Field
-          label="Display Name"
-          required
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-        />
-        <Field
-          label="Email"
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <form action={formAction} className="flex flex-col gap-4">
+        <Field label="Display Name" name="displayName" required />
+        <Field label="Email" type="email" name="email" required />
         <Field
           label="Password (6+ chars)"
           type="password"
+          name="password"
           minLength={6}
           required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
         />
-        {error && (
+        {state?.error && (
           <div className="rounded-lg border border-red-900/50 bg-red-950/30 p-3 text-xs text-red-300">
-            {error}
+            {state.error}
           </div>
         )}
-        <ActionButton variant="primary" disabled={pending}>
-          {pending ? '⏳ กำลังสมัคร...' : '🚀 สมัครสมาชิก'}
-        </ActionButton>
+        <SubmitButton />
       </form>
 
       <div className="mt-6 text-center text-xs text-muted">
@@ -94,5 +59,14 @@ export default function SignupPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return (
+    <ActionButton variant="primary" type="submit" disabled={pending}>
+      {pending ? '⏳ กำลังสมัคร...' : '🚀 สมัครสมาชิก'}
+    </ActionButton>
   );
 }
